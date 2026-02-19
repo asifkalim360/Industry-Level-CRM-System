@@ -32,5 +32,6 @@ Enterprise-level CRM system built with Spring Boot.
 - Email Notification
 - Redis Cache
 - Docker Deployment
+- ----
 
 This project is built using industry-level architecture and best practices.
