@@ -5,8 +5,8 @@ spring:
     password: asif
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update        # ddl-auto: update → Dev me table auto create/update ho jayegi.
+    show-sql: true            # show-sql true → Query console me dikhegi (debugging ke liye).
     properties:
       hibernate:
         format_sql: true

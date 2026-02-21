@@ -7,13 +7,13 @@ import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 
-@MappedSuperclass
+@MappedSuperclass    // Ye table nahi banayega, lekin jo entity extend karegi usme ye fields aa jayengi.
 @Getter
 @Setter
 public abstract class BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)    // Auto increment id.
     private Long id;
 
     // Record kab create hua
@@ -24,14 +24,14 @@ public abstract class BaseEntity {
     private LocalDateTime updatedAt;
 
     // Soft delete ke liye
-    private Boolean isDeleted = false;
+    private Boolean isDeleted = false;      // Hard delete nahi karenge. Data kabhi permanently delete nahi hota real systems me.
 
-    @PrePersist
+    @PrePersist     // Insert hone se pehle auto timestamp set karega.
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
 
-    @PreUpdate
+    @PreUpdate      // Update hone se pehle updated time set karega.
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
