@@ -25,3 +25,8 @@ management:
       show-details: always
       probes:
         enabled: true
+
+#jwt:
+#  secret: mySecretKeymySecretKeymySecretKey
+#  access-expiration: 900000        # 15 min
+#  refresh-expiration: 604800000    # 7 days

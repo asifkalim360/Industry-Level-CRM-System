@@ -1,9 +1,9 @@
 package com.enterprise.crm.common.audit;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 
