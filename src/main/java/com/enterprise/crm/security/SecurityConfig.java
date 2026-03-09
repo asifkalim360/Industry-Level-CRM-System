@@ -2,7 +2,6 @@ package com.enterprise.crm.security; // Security configuration related classes y
 
 import lombok.RequiredArgsConstructor;
 // ye dono Spring configuration aur bean banane ke liye.
-import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 // ye dono AuthenticationManager login process handle karta hai.
@@ -19,6 +18,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 // ye dono ka use Filter chain define karne ke liye karte hain.
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+
+import java.util.List;
+
 
 @Configuration      // Ye Spring ko batata hai: Ye class configuration class hai.
 @EnableWebSecurity
@@ -27,6 +31,8 @@ public class SecurityConfig {
 
     // yahan pe custom JWT filter inject ho raha hai.
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
 
     @Bean               //Ye sabse important method hai: Spring Boot 3 me:
@@ -39,6 +45,22 @@ public class SecurityConfig {
                 //Humlog JWT + Stateless use kar rahe hain. Isliye CSRF disable karna correct hai.
                 .csrf(csrf -> csrf.disable())
 
+                // ✅ YAHAN ADD KARNA HOGA CORS KO. (CSRF KE TURANT BAAD)
+                .cors(cors -> cors.configurationSource(request -> {
+                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();
+                    corsConfig.setAllowedOrigins(List.of("http://localhost:3000"));
+                    corsConfig.setAllowedMethods(List.of("GET","POST","PUT","DELETE"));
+                    corsConfig.setAllowedHeaders(List.of("*"));
+                    return corsConfig;
+                }))
+
+                // Token missing / invalid → CustomAuthenticationEntryPoint call hoga (401)
+                // Token valid BUT role allowed nahi → CustomAccessDeniedHandler call hoga (403)
+                // Enterprise style error handling complete.
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
                 // Ye line bahut important hai: STATELESS ka matlab.Server session store nahi karega
                 //Har request me token required hoga. Ye JWT based system ke liye mandatory hai.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,10 +72,12 @@ public class SecurityConfig {
                         //Without token access ho sakta hai.
                         .requestMatchers(
                                 "/api/v1/auth/**",
+                                "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/v3/api-docs/**",
                                 "/actuator/**"
+
                         ).permitAll()
 
                         // Admin Endpoints: Role based access -> (.requestMatchers("/api/v1/admin/**").hasRole("ADMIN"))
@@ -95,6 +119,18 @@ public class SecurityConfig {
             throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+    // (Spring Security 6.3+ / Boot 3.2+) -> Ab tumhe static factory method use karna padega.
+    // NOW : @PreAuthorize("hasRole('USER')") -> Admin bhi access kar lega automatically.(CLEAN RBAC)
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+
+        return RoleHierarchyImpl.fromHierarchy("""
+        ROLE_ADMIN > ROLE_MANAGER
+        ROLE_MANAGER > ROLE_USER
+    """);
+    }
+
 
 }
 

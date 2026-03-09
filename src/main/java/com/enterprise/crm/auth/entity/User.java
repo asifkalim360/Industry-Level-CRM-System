@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -34,5 +35,11 @@ public class User extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    // Login Attempt Limit + Account Lock  KE LIYE -> Add Fields in User Entity
+    // Brute force attack se bachne ke liye.
+    private int failedAttempts;
+    private boolean accountLocked;
+    private LocalDateTime lockTime;
 
 }

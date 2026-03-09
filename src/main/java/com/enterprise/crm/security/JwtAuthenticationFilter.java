@@ -47,9 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         //Step 2 — Header Check -> Agar: Header nahi hai, Bearer prefix nahi hai -> Toh filter skip ho jayega.
         // Important: Public endpoints ke liye ye allow karta hai.
-        if(authHeader == null || !authHeader.startsWith("Bearer "))
-        {
-            filterChain.doFilter(request, response);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);   // JUST PASS
             return;
         }
 
